@@ -31,6 +31,8 @@ class FirstPage extends StatefulWidget {
 
 class _FirstPageState extends State<FirstPage> {
   FirebaseFirestoreService firestoreService = FirebaseFirestoreService();
+
+  TextEditingController textEditingController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,30 +41,41 @@ class _FirstPageState extends State<FirstPage> {
         builder: (context, snapshot) {
           return !snapshot.hasData
               ? const CircularProgressIndicator()
-              : ListView.builder(
-                  itemCount: snapshot.data!.docs.length,
-                  itemBuilder: (context, index) {
-                    DocumentSnapshot values = snapshot.data!.docs[index];
+              : Column(
+                  children: [
+                    Spacer(),
+                    TextField(
+                      controller: textEditingController,
+                    ),
+                    ElevatedButton(
+                        onPressed: () => firestoreService
+                            .saveValueToFirestore(textEditingController.text),
+                        child: const Text('veriyi kaydet')),
+                    ElevatedButton(
+                        onPressed: () =>
+                            firestoreService.updateValueFromFirestore(
+                                'deneme', 'update edildi'),
+                        child: const Text('güncelle button')),
+                    ElevatedButton(
+                        onPressed: () => firestoreService
+                            .removeValueFromFirestore('document2'),
+                        child: const Text('sil button')),
+                    Container(
+                      height: 250,
+                      child: ListView.builder(
+                        itemCount: snapshot.data!.docs.length,
+                        itemBuilder: (context, index) {
+                          DocumentSnapshot values = snapshot.data!.docs[index];
 
-                    return Column(
-                      children: [
-                        ElevatedButton(
-                            onPressed: () =>
-                                firestoreService.saveValueToFirestore(),
-                            child: const Text('veriyi kaydet')),
-                        ElevatedButton(
-                            onPressed: () =>
-                                firestoreService.updateValueFromFirestore(
-                                    'deneme', 'update edildi'),
-                            child: const Text('güncelle button')),
-                        ElevatedButton(
-                            onPressed: () => firestoreService
-                                .removeValueFromFirestore('deneme'),
-                            child: const Text('sil button')),
-                        Text(values['isim']),
-                      ],
-                    );
-                  },
+                          return Column(
+                            children: [
+                              Text(values.get('isim')),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 );
         },
       ),
